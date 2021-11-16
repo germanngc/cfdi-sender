@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"diffEditor.wordWrap": "on",
+		"bladeFormatter.format.useTabs": true,
+		"files.associations": {
+			"*.blade.php": "blade"
+		},
+		"editor.wordWrap": "on",
+		"editor.insertSpaces": false
+	}
+}

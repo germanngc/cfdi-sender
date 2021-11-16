@@ -1,0 +1,52 @@
+version: "3.8"
+networks:
+    cfdi-sender:
+        driver: bridge
+services:
+    app:
+        build:
+            args:
+                user: cfdi-sender
+                uid: 1000
+            context: ./
+            dockerfile: Dockerfile
+        container_name: cfdi-sender-app
+        depends_on:
+            - db
+        image: cfdi-sender
+        restart: unless-stopped
+        networks:
+            - cfdi-sender
+        volumes:
+            - ./:/var/www
+            - ./docker-compose/php/cfdi-sender.ini:/usr/local/etc/php/conf.d/cfdi-sender.ini
+        working_dir: /var/www/
+    db:
+        container_name: cfdi-sender-db
+        environment:
+            MARIADB_DATABASE: ${DB_DATABASE}
+            MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
+            MARIADB_PASSWORD: ${DB_PASSWORD}
+            MARIADB_USER: ${DB_USERNAME}
+        image: mariadb:10
+        networks:
+            - cfdi-sender
+        ports:
+            - 3309:3306
+        restart: unless-stopped
+        volumes:
+            - ./docker-compose/mysql/init:/docker-entrypoint-initdb.d
+            - ./docker-compose/mysql/persistent:/var/lib/mysql
+    nginx:
+        container_name: cfdi-sender-nginx
+        image: nginx:1.19-alpine
+        networks:
+            - cfdi-sender
+        ports:
+            - 8890:80
+        restart: unless-stopped
+        volumes:
+            - ./:/var/www
+            # Make sure you have cfdi-sender.conf
+            - ./docker-compose/nginx:/etc/nginx/conf.d
+            - ./docker-compose/nginx/logs:/var/log/nginx
